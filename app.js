@@ -1,23 +1,23 @@
-require("dotenv").config(); // Load environment variables from .env file
 const express = require("express");
 const mongoose = require("mongoose");
-const authorRoutes = require("./routes/authorRoutes"); // Import author routes
-const connectDB = require("./config/db"); // Import DB connection function
+const dotenv = require("dotenv");
+const authorRoutes = require("./routes/authorRoutes");
+
+dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(express.json()); // Parse JSON data in requests
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log("MongoDB connection error:", err));
+
+app.use(express.json());
 
 // Routes
-app.use("/api/authors", authorRoutes); // API route for authors
+app.use(authorRoutes);
 
-// Connect to Database and Start Server
-const PORT = process.env.PORT || 8080;
-connectDB() // Connect to MongoDB
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`); // Start the server
-    });
-  })
-  .catch((err) => console.error("Database connection failed:", err));
+module.exports = app;
